@@ -1,0 +1,3 @@
+C:/Users/ADMIN/CLionProjects/dim_2d_array/cmake-build-debug/CMakeFiles/dim_2d_array.dir
+C:/Users/ADMIN/CLionProjects/dim_2d_array/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/ADMIN/CLionProjects/dim_2d_array/cmake-build-debug/CMakeFiles/rebuild_cache.dir
