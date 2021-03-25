@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/ADMIN/CLionProjects/hash_table_diferrent_types/hash.c
+hash.h
+C:/Users/ADMIN/CLionProjects/hash_table_diferrent_types/hash.h
+
+C:/Users/ADMIN/CLionProjects/hash_table_diferrent_types/hash.h
+malloc.h
+-
+string.h
+-
+
+C:/Users/ADMIN/CLionProjects/hash_table_diferrent_types/main.c
+hash.h
+C:/Users/ADMIN/CLionProjects/hash_table_diferrent_types/hash.h
+malloc.h
+-
+string.h
+-
+
