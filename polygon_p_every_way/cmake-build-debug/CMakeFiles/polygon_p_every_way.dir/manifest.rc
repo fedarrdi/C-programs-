@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Users/ADMIN/CLionProjects/polygon_p_every_way/cmake-build-debug/CMakeFiles/polygon_p_every_way.dir/embed.manifest"
