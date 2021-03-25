@@ -1,0 +1,3 @@
+C:/Users/ADMIN/CLionProjects/ring_opearitions/cmake-build-debug/CMakeFiles/ring_opearitions.dir
+C:/Users/ADMIN/CLionProjects/ring_opearitions/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/ADMIN/CLionProjects/ring_opearitions/cmake-build-debug/CMakeFiles/rebuild_cache.dir
