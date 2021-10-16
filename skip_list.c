@@ -21,7 +21,7 @@ struct list* add(struct list *list, int data)
         return new_item;
 
     ///if the item is the smallest one in the list
-    if(list->data > new_item->data)
+    if(list->data >= new_item->data)
     {
         list->prev = new_item;
         new_item->next = list;
