@@ -132,7 +132,7 @@ struct list* add(struct list *list, int data)
         }
         else
             break;
-    }
+    } 
 
     return r_pointer;
 }
