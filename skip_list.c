@@ -6,8 +6,24 @@ struct list
 {
     struct list *prev, *next;
     int data;
-    struct list **skip;///dynamic array
+    struct list **skip_next, **skip_prev;
 };
+
+
+void print_list(struct list* list)
+{
+    for(struct list* curr_item = list; curr_item; curr_item = curr_item->next)
+    {
+        printf("*=%p d=%d next=%p skip_next=%p", curr_item, curr_item->data, curr_item->next, curr_item->skip_next);
+        if(curr_item->skip_next)
+            printf(" skip_next[0]=%p", curr_item->skip_next[0]);
+
+        if(curr_item->skip_prev)
+            printf(" skip_prev[0]=%p", curr_item->skip_prev[0]);
+
+        puts("");
+    }
+}
 
 struct list* add(struct list *list, int data)
 {
@@ -15,7 +31,8 @@ struct list* add(struct list *list, int data)
     struct list *new_item = malloc(sizeof(*new_item));
     new_item->data = data;
     new_item->prev = NULL;
-    new_item->skip = NULL;
+    new_item->skip_next = NULL;
+    new_item->skip_prev = NULL;
     new_item->next = NULL;
     if(!list)
         return new_item;
@@ -29,7 +46,7 @@ struct list* add(struct list *list, int data)
         goto skip_other;
     }
 
-    for(struct list *curr_item = list; curr_item; curr_item = curr_item->skip)
+    for(struct list *curr_item = list; curr_item; curr_item = curr_item->skip_next)
     {
         if(new_item->data < curr_item->data)
             for(struct list *interval_item = curr_item; interval_item; interval_item = interval_item->prev)
@@ -69,53 +86,73 @@ struct list* add(struct list *list, int data)
     }
     skip_other:;
 
+    print_list(r_pointer);
+    printf("\n");
+
     ///removing all skips
-    for(struct list *curr_item = new_item; curr_item ;curr_item = curr_item->next)
+    for(struct list *curr_item = r_pointer; curr_item ;curr_item = curr_item->next)
     {
-        if (curr_item->skip)
+        if (curr_item->skip_next)
         {
-            free(curr_item->skip);
-            curr_item->skip = NULL;
+            free(curr_item->skip_next);
+            curr_item->skip_next = NULL;
+        }
+
+        if(curr_item->skip_prev)
+        {
+            free(curr_item->skip_prev);
+            curr_item->skip_prev = NULL;
         }
     }
 
-    for(struct list *curr_item = new_item; curr_item ;)
+    print_list(r_pointer);
+    printf("\n\n\n\n\n");
+
+    struct list *last_item;
+    for(struct list *curr_item = r_pointer; curr_item ;)
     {
+        last_item = curr_item;
         if(curr_item->next && curr_item->next->next)
         {
-            curr_item->skip = malloc(sizeof(curr_item->skip));
-            curr_item->skip[0] = curr_item->next->next;
-            curr_item = curr_item->skip[0];
+            curr_item->skip_next = malloc(sizeof(curr_item->skip_next));
+            curr_item->skip_next[0] = curr_item->next->next;
+            curr_item = curr_item->skip_next[0];
         }
         else
             break;///there are not enough element therefor we break
     }
 
-    return r_pointer;
-}
-
-void print_list(struct list* list)
-{
-    for(struct list* curr_item = list; curr_item; curr_item = curr_item->next)
+    for(struct list *curr_item = last_item; curr_item ;)
     {
-        printf("*=%p d=%d next=%p skip=%p", curr_item, curr_item->data, curr_item->next, curr_item->skip);
-        if(curr_item->skip)
-            printf(" skip[0]=%p", curr_item->skip[0]);
-
-        puts("");
+        if (curr_item->prev && curr_item->prev->prev)
+        {
+            curr_item->skip_prev = malloc(sizeof(curr_item->skip_prev));
+            curr_item->skip_prev[0] = curr_item->prev->prev;
+            curr_item = curr_item->skip_prev[0];
+        }
+        else
+            break;
     }
+
+    return r_pointer;
 }
 
 
 int main()
 {
     struct list* list = NULL;
-    list = add(list, 7);
-    list = add(list, 48);
-    list = add(list, 27);
-    list = add(list, 3);
-    list = add(list, 41);
     list = add(list, 1);
-    print_list(list);
+    list = add(list, 2);
+    list = add(list, 3);
+    list = add(list, 4);
+    list = add(list, 5);
+    list = add(list, 6);
+    list = add(list, 7);
+    list = add(list, 8);
+    list = add(list, 9);
+    list = add(list, 10);
+    list = add(list, 11);
+    list = add(list, 12);
+
     return 0;
 }
