@@ -121,7 +121,7 @@ struct list* add(struct list *list, int data)
         else
             break;///there are not enough element therefor we break
     }
-
+    last_item = last_item->next;
     for(struct list *curr_item = last_item; curr_item ;)
     {
         if (curr_item->prev && curr_item->prev->prev)
@@ -132,7 +132,7 @@ struct list* add(struct list *list, int data)
         }
         else
             break;
-    } 
+    }
 
     return r_pointer;
 }
@@ -153,6 +153,6 @@ int main()
     list = add(list, 10);
     list = add(list, 11);
     list = add(list, 12);
-
+    print_list(list);
     return 0;
 }
