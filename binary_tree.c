@@ -1,9 +1,7 @@
 
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#define MIN_INT -214748364
-#define MAX_INT 2147483647
 
 struct node_t
 {
@@ -168,57 +166,38 @@ struct queue_t *queue_push(struct queue_t *queue, struct node_t *node)
 
 struct queue_t * queue_pop(struct queue_t *queue)
 {
-    if(!queue) return NULL;
+    if(!queue)
+        return NULL;
     struct queue_t *old_head = queue;
     queue = queue->next;
     free(old_head);
     return queue;
 }
 
-void bfs_print(struct node_t * tree)
+
+void bfs_print(struct node_t *tree)
 {
+    struct queue_t *queue = queue_push(NULL, tree), *buffer = NULL;
 
-    struct queue_t *queue = queue_push(NULL, tree);
-    long long min = tree->data, max = tree->data;
-    char has_child_left = 1, has_child_right = 1;
-    struct node_t *prev = NULL;
-
-    do
+    while(queue)
     {
-        struct node_t *curr_node = queue->node;
-        queue = queue_pop(queue);
-
-        if(curr_node != NULL)
+        while(queue)
         {
-            queue = queue_push(queue, curr_node->left);
-            queue = queue_push(queue, curr_node->right);
+            struct node_t *curr_node = queue->node;
+            printf("%d ", queue->node->data);
 
-            if(prev)
-                has_child_left = !!prev->left, has_child_right = !!prev->right;
-            else
-                prev = curr_node;
+            queue = queue_pop(queue);
 
-            if(has_child_left && has_child_right) has_child_right = 0;
-            else has_child_left = has_child_right = 1;
+            if(curr_node->left)
+                buffer = queue_push(buffer, curr_node->left);
 
-            if(curr_node->data < min && has_child_left)
-            {
-                min = curr_node->data;
-                printf("\n");
-            }
-
-            if(curr_node->data > max && has_child_right)
-            {
-                max = curr_node->data;
-                printf("\n");
-            }
-
-            printf("%d ", curr_node->data);
+            if(curr_node->right)
+                buffer = queue_push(buffer, curr_node->right);
         }
-    }while(queue);
-
-    printf("\n");
-    printf("\n");
+        printf("\n");
+        queue = buffer;
+        buffer = NULL;
+    }
 }
 
 
@@ -248,3 +227,4 @@ int main()
 
     return 0;
 }
+
