@@ -171,7 +171,7 @@ struct node_t * balance(struct node_t *node)
 }
 
 
-struct node_t * AVL_add(struct node_t * tree,int  data)
+struct node_t * AVL_add(struct node_t * tree, int data)
 {
     struct node_t *new_node = init_node(data);
 
@@ -195,34 +195,27 @@ void print_tree(struct  node_t *tree)
     print_tree(tree->right);
 }
 
-unsigned cnt_elements(struct node_t* tree)
+void iterate_over_tree(struct node_t *tree, struct node_t **result1, struct node_t **result2, int *cnt)
 {
-    if (tree == NULL) return 0;
-    return cnt_elements(tree->left) + cnt_elements(tree->right)+1;
+    if(!tree) return;
+
+    iterate_over_tree(tree->left, result1,  result2, cnt);
+
+    if (!(*cnt))
+        *result1 = AVL_add(*result1, tree->data);
+    else
+        *result2 = AVL_add(*result2, tree->data);
+
+    *cnt = !(*cnt);
+
+    iterate_over_tree(tree->right, result1,  result2, cnt);
 }
 
-int * gather_elements(struct node_t *tree, int *values)
-{
-    if(!tree) return values;
-    values = gather_elements(tree->left, values);
-    (*values++) = tree->data;
-    values = gather_elements(tree->right, values);
-    return values;
-}
 
 void split(struct node_t *tree, struct node_t *result1, struct node_t *result2)
 {
-    unsigned element_count = cnt_elements(tree);
-    int* array = malloc(sizeof *array * element_count);
-    gather_elements(tree, array);
-
-    for(int i = 0;i < element_count;i++)
-    {
-        if(i%2 == 0)
-            result1 = AVL_add(result1, array[i]);
-        else
-            result2 = AVL_add(result2, array[i]);
-    }
+    int cnt = 0;
+    iterate_over_tree(tree, &result1, &result2, &cnt);
 
     printf("tree1 \n");
     print_tree(result1);
