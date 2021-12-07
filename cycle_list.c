@@ -1,37 +1,48 @@
-#include <stdio.h>
-#include <stdlib.h>
-
+#include<stdio.h>
+#include<stdlib.h>
 struct node_t
 {
     int value;
-    struct node_t* left;
-    struct node_t* right;
+    struct node_t *next, *prev;
 };
 
 int is_cyclic(struct node_t *node)
 {
-    for(struct node_t *curr = node->right; ;curr = curr->right)
-    {
-        if(curr == node)
-            return 1;
+    struct node_t *slow = node, *fast = node;
 
-        if(!curr)
-            return 0;
+    while(1)
+    {
+        if(!fast || !fast->next || !fast->next->next) return 0;
+        fast = fast->next->next;
+        slow = slow->next;
+
+        if(fast->value == slow->value)
+        {
+            struct node_t *curr_cycle = slow;
+
+            while(1)
+            {
+                if(slow == node) return 1;
+                if(slow == curr_cycle) return 0;
+                slow = slow->next;
+            }
+        }
+
     }
 }
 
 struct node_t * add(struct node_t *list, int value)
 {
     struct node_t *new_node = malloc(sizeof *new_node), *start = list;
-    new_node->right = new_node->left = NULL;
+    new_node->next = new_node->prev = NULL;
     new_node->value = value;
 
     if(!list) return new_node;
 
-    for(;list->right;list = list->right);
+    for(;list->next;list = list->next);
 
-    list->right = new_node;
-    new_node->left = list;
+    list->next = new_node;
+    new_node->prev = list;
 
     return start;
 }
@@ -41,13 +52,14 @@ void make_cycle(struct node_t ** list)
 {
     if(!(*list)) return;
 
-    struct node_t *curr= *list;
+    struct node_t *curr = *list;
 
-    for(;curr->right;curr = curr->right);
+    for(;curr->next;curr = curr->next);
 
-    curr->right = *list;
-    (*list)->left = curr;
+    curr->next = *list;
+    (*list)->next = curr;
 }
+
 
 
 
@@ -60,12 +72,11 @@ int main()
     list = add(list, 5);
     list = add(list, 6);
     list = add(list, 7);
-    
+
     int a = is_cyclic(list);
 
     make_cycle(&list);
 
     a = is_cyclic(list);
-
     return 0;
 }
