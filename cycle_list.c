@@ -6,7 +6,7 @@ struct node_t
     struct node_t *next, *prev;
 };
 
-int is_cyclic(struct node_t *node)
+int is_cyclic_next(struct node_t *node)
 {
     struct node_t *slow = node, *fast = node;
 
@@ -29,6 +29,38 @@ int is_cyclic(struct node_t *node)
         }
 
     }
+}
+
+
+int is_cyclic_prev(struct node_t *node)
+{
+    struct node_t *slow = node, *fast = node;
+
+    while(1)
+    {
+        if(!fast || !fast->prev || !fast->prev->prev) return 0;
+        fast = fast->prev->prev;
+        slow = slow->prev;
+
+        if(fast->value == slow->value)
+        {
+            struct node_t *curr_cycle = slow;
+
+            while(1)
+            {
+                if(slow == node) return 1;
+                if(slow == curr_cycle) return 0;
+                slow = slow->prev;
+            }
+        }
+
+    }
+}
+
+
+int is_cyclic(struct node_t *node)
+{
+    return is_cyclic_next(node) || is_cyclic_prev(node);
 }
 
 struct node_t * add(struct node_t *list, int value)
