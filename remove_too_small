@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct node_t
+{
+    int data;
+    struct node_t * left, *right, *parent;
+};
+
+struct node_t *init_node(int data)
+{
+    struct node_t *new_node = malloc(sizeof *new_node);
+    new_node->left = new_node->right =  new_node->parent = NULL;
+    new_node->data = data;
+    return new_node;
+}
+
+struct node_t *find_newNode_place(struct node_t *parent, struct node_t *tree, struct node_t *new_node)
+{
+    if(!tree)
+    {
+        new_node->parent = parent;
+        return new_node;
+    }
+
+    if(new_node->data < tree->data)
+        tree->left = find_newNode_place(tree, tree->left, new_node);
+
+    if(new_node->data > tree->data)
+        tree->right = find_newNode_place(tree, tree->right, new_node);
+
+    return tree;
+}
+
+struct node_t * re_arrange(struct node_t *branch, struct node_t *tree, struct  node_t * parent)
+{
+    if (tree == NULL)
+    {
+        branch->parent = parent;
+        return branch;
+    }
+    if (branch->data < tree->data)
+        tree->left = re_arrange(branch, tree->left, tree);
+
+    else
+        tree->right = re_arrange(branch, tree->right, tree);
+
+    return tree;
+}
+
+struct node_t * add(struct node_t *tree, int data)
+{
+
+    struct node_t *new_node = init_node(data);
+
+    if (!tree) return new_node;
+
+    tree = find_newNode_place(NULL, tree, new_node);
+
+    return tree;
+}
+
+struct node_t * remove_(struct node_t *root, struct node_t *chield)
+{
+    struct node_t * ret = chield;
+    while(root)
+    {
+        struct node_t *left_c = (root)->left, *right_c = (root)->right, *root_parent = (root)->parent;
+
+        if (!(root)->left) {
+            if (2 * (root)->data < (root)->right->data) {
+                root = NULL;
+                right_c->parent = root_parent;
+                if (root_parent) {
+                    if (root_parent->data < right_c->data)
+                        root_parent->right = right_c;
+                    else
+                        root_parent->left = right_c;
+                }
+                root = right_c;
+            }
+        } else if (!(root)->right){
+            if (2 * (root)->data < (root)->left->data) {
+                root = NULL;
+                left_c->parent = root_parent;
+
+                if (root_parent) {
+                    if (root_parent->data < left_c->data)
+                        root_parent->right = left_c;
+                    else
+                        root_parent->left = left_c;
+                }
+                root = left_c;
+            }
+        }
+        else if (2 * (root)->data < (root)->left->data + (root)->right->data)
+        {
+            root = NULL;
+            right_c->parent = root_parent;
+
+            if(root_parent)
+            {
+                if(root_parent->data < right_c->data)
+                    root_parent->right = right_c;
+                else
+                    root_parent->left = right_c;
+            }
+
+            right_c = re_arrange(left_c, right_c, right_c->parent);
+
+            root = right_c;
+        }
+        ret = root;
+        root = (root)->parent;
+    }
+    return ret;
+}
+
+struct node_t* remove_too_small(struct node_t *root, struct node_t *original_root)///zapochvame ot listata
+{
+    if(!root->left && !root->right)
+        original_root = remove_(root->parent, root);
+
+    if(root->left)
+        remove_too_small(root->left, original_root);
+
+    if(root->right)
+        remove_too_small(root->right, original_root);
+
+
+    return original_root;
+}
+
+void print_tree(struct node_t *tree)
+{
+    if(!tree) return;
+    printf("%d\n" , tree->data);
+    print_tree(tree->left);
+    print_tree(tree->right);
+
+}
+
+int main()
+{
+    struct node_t *tree = add(NULL, 1);
+    tree = add(tree, 17);
+    tree = add(tree, 4);
+    tree = add(tree, 5);
+    tree = add(tree, 15);
+    tree = add(tree, 332);
+    tree = add(tree, 13);
+    tree = add(tree, 2);
+    tree = add(tree, 9);
+    tree = add(tree, 28);
+    tree = add(tree, 98);
+    print_tree(tree);
+    tree = remove_too_small(tree, tree);
+    print_tree(tree);
+    return 0;
+}
