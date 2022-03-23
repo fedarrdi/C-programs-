@@ -35,21 +35,23 @@ struct graph
 unsigned length(int n)
 {
     unsigned l = 0;
-    for(;n;n %= 10, l++);
+    for(;n;n /= 10, l++);
     return l;
 }
-
-unsigned findDigits(int n)
-{
-    if (n == 1) return 1;
-    return length(n) + findDigits(n - 1);
-}
-
 int number_of_bits_in(int n)
 {
     long long p = 1, out = 0;
-    while(n < p)
+    while(n >= p)
         p <<= 1, out++;
+    return out;
+}
+
+unsigned long long number_of_bits_board(const struct board board)
+{
+    unsigned long long out = 0;
+    for(int y = 0;y < board.n;y++)
+        for (int x = 0; x < board.m; x++)
+               out += number_of_bits_in(board.data[y][x]);
     return out;
 }
 
@@ -68,10 +70,11 @@ void put_digits(unsigned long long *arr, struct board board)
         }
 }
 
-unsigned long long *from_board_to_ind(const struct board board)
+unsigned long long *from_board_to_ind(const struct board board, struct node *node)
 {
-    unsigned num_of_ll = findDigits(board.m * board.n - 1) / sizeof(unsigned long long);
-    unsigned long long *ind = malloc(sizeof(num_of_ll));
+    int ull = number_of_bits_board(board);
+    node->ull_count =  ull / (sizeof(unsigned long long) * 8) + 1;
+    unsigned long long *ind = malloc(sizeof *ind * node->ull_count);
     put_digits(ind, board);
     return ind;
 }
@@ -90,8 +93,7 @@ struct node * init_node(const struct board board)
 {
     struct node * new_node = malloc(sizeof *new_node);
     new_node->ready_v = from_board_to_ready_v(board);
-    new_node->index = from_board_to_ind(board);
-    new_node->ull_count = number_of_bits_in(board.n * board.m) / 8 / sizeof (unsigned long long);
+    new_node->index = from_board_to_ind(board, new_node);
     return new_node;
 }
 
@@ -311,7 +313,6 @@ struct board *read_file(char *file_name)
         }
         y++;
     }
-
     return board;
 }
 
@@ -331,6 +332,27 @@ int main(int argc, char** argv)
         printf("\n");
     }
     struct board cpy = *board;
+
+    struct node *root = init_node(cpy);
+
+    struct board *board1 = init_board(3, 3, (struct point){2,2});
+
+    int p = 9;
+    for(int y = 0;y < board1->n;y++)
+        for(int x = 0;x < board1->m;x++)
+            board1->data[y][x] = p--;
+
+    board1->data[2][2] = 0;
+
+
+    struct board b = *board1;
+    struct node *other = init_node(b);
+
+
+    /*struct graph *graph = {0, NULL};
+    struct graph *path = (0, NULL);
+
+    A_star(cpy, root, graph, path);*/
 
     return 0;
 }
