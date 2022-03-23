@@ -29,8 +29,6 @@ struct graph
     struct node **node;
 };
 
-#include "structs.h"
-#include<stdlib.h>
 
 unsigned length(int n)
 {
