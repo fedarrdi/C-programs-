@@ -138,9 +138,10 @@ int cmp_nodes(const struct node *a,const struct node *b)
 
 void add_child_to(struct node * parent, struct node * child)
 {
-    for(int i = 0;i < parent->children_count;i++)
-        if(!cmp_nodes(parent->children[i], child))
-            return;
+    if(parent->children)
+        for(int i = 0;i < parent->children_count;i++)
+            if(!cmp_nodes(parent->children[i], child))
+                return;
 
     int children_arr_size = sizeof(parent->children) / sizeof (*child);
 
@@ -179,7 +180,6 @@ int is_place_valid(struct board board, const struct point *pos)
 struct board generate_new_board(struct board board, struct point *delta_empty)///first time last_empty == board->empty
 {
     struct point pos;
-
     if(!delta_empty->x && !delta_empty->y)
     {
         pos.x = board.empty.x, pos.y = board.empty.y - 1;
@@ -238,16 +238,39 @@ int check_exist(const struct graph * graph, struct node * curr)
 }
 
 
+void print_board(struct board board)
+{
+    for(int y = 0;y < board.n;y++)
+    {
+        for (int x = 0; x < board.m; x++)
+        {
+            printf("%d ", board.data[y][x]);
+        }
+        printf("\n");
+    }
+}
+
 int A_star(struct board board, struct node *parent, struct graph *graph, struct graph *path)
 {
     struct point delta = {0, 0};
-    struct node *nodes[4];
-    struct board boards[4];
+
+    struct node **nodes = malloc(sizeof *nodes * 4);
+    struct board *boards = malloc(sizeof *boards);
+
     int count = 0;
 
     while(delta.x != 1 && delta.y != 1)
     {
+        print_board(board);
+        printf("\n");
         struct board new_board = generate_new_board(board, &delta);
+
+        print_board(board);
+        printf("\n");
+
+        print_board(new_board);
+        printf("======================================\n");
+
         struct node *new_node = init_node(new_board);
 
         if(check_exist(graph, new_node))
@@ -269,9 +292,16 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
 
     if(nodes[best_index]->ready_v == 1) return 1;
 
-    if(A_star(boards[best_index], nodes[best_index], graph, path))
+
+    struct node *curr_node = nodes[best_index];
+    struct board curr_board = boards[best_index];
+
+    free(boards);
+    free(nodes);
+
+    if(A_star(curr_board, curr_node, graph, path))
     {
-        add_to_graph(path, nodes[best_index]);
+        add_to_graph(path, curr_node);
         return 1;
     }
 }
@@ -328,26 +358,13 @@ int main(int argc, char** argv)
 {
     if(argc < 2) return 0;
 
-    struct board *board = read_file(argv[1]);
-
-    for(int i = 0;i < board->n;i++)
-    {
-        for (int j = 0; j < board->m; j++)
-        {
-            int curr = board->data[i][j];
-            printf("%d ", curr);
-        }
-        printf("\n");
-    }
-    struct board cpy = *board;
+    struct board *board = read_file(argv[1]), cpy = *board;
 
     struct node *root = init_node(cpy);
 
-    struct board *board1 = init_board(3, 3, (struct point){2,2});
-
-    struct graph *graph = init_graph();
-    struct graph *path = init_graph();
-
+    struct graph *graph = init_graph(), *path = init_graph();
+    print_board(cpy);
+    printf("\n\n ===========start==========\n\n");
     A_star(cpy, root, graph, path);
 
     return 0;
