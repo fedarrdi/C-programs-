@@ -175,9 +175,25 @@ int is_place_valid(struct board board, const struct point *pos)
     return pos->x >= 0 && pos->x < board.n && pos->y >= 0 && pos->y < board.m;
 }
 
+int **cpy_data(struct board board)
+{
+    int **data = malloc(board.n * sizeof (*data));
+    for(int i = 0;i < board.n;i++)
+        data[i] = malloc(board.m * sizeof (**data));
+
+    for(int y = 0;y < board.n;y++)
+        for(int x = 0;x < board.m;x++)
+            data[y][x] = board.data[y][x];
+
+    return data;
+}
+
 struct board generate_new_board(struct board board, struct point *delta_empty)///first time last_empty == board->empty
 {
     struct point pos;
+
+    int **data = cpy_data(board);
+
     if(!delta_empty->x && !delta_empty->y)
     {
         pos.x = board.empty.x, pos.y = board.empty.y - 1;
@@ -185,8 +201,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty)//
 
         if (is_place_valid(board, &pos))
         {
-            swap(&board.data[board.empty.y][board.empty.x], &board.data[pos.y][pos.x]);
-            return board;
+            swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
+            return (struct board){board.n, board.m, data, pos, data};
         }
     }
 
@@ -197,8 +213,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty)//
 
         if (is_place_valid(board, &pos))
         {
-            swap(&board.data[board.empty.y][board.empty.x], &board.data[pos.y][pos.x]);
-            return board;
+            swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
+            return (struct board){board.n, board.m, data, pos, data};
         }
     }
 
@@ -209,8 +225,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty)//
 
         if (is_place_valid(board, &pos))
         {
-            swap(&board.data[board.empty.y][board.empty.x], &board.data[pos.y][pos.x]);
-            return board;
+            swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
+            return (struct board){board.n, board.m, data, pos, data};
         }
     }
 
@@ -221,8 +237,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty)//
 
         if (is_place_valid(board, &pos))
         {
-            swap(&board.data[board.empty.y][board.empty.x], &board.data[pos.y][pos.x]);
-            return board;
+            swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
+            return (struct board){board.n, board.m, data, pos, data};
         }
     }
 }
@@ -248,27 +264,36 @@ void print_board(struct board board)
     }
 }
 
+void delete_function(struct node **nodes, struct board * boards, int count, int best_index)
+{
+    for(int i = 0;i < count;i++)
+    {
+        if(i == best_index)
+            continue;
+
+        free(nodes[i]->index);
+        free(nodes[i]->children);
+
+        for(int j = 0;j < boards[i].n;j++)
+            free(boards[i].data[j]);
+    }
+
+    free(nodes);
+    free(boards);
+}
+
 int A_star(struct board board, struct node *parent, struct graph *graph, struct graph *path)
 {
     struct point delta = {0, 0};
 
     struct node **nodes = malloc(sizeof *nodes * 4);
-    struct board *boards = malloc(sizeof *boards);
+    struct board *boards = malloc(sizeof *boards * 4);
 
     int count = 0;
 
     while(delta.x != 1 && delta.y != 1)
     {
-        print_board(board);
-        printf("\n");
         struct board new_board = generate_new_board(board, &delta);
-
-        print_board(board);
-        printf("\n");
-
-        print_board(new_board);
-        printf("======================================\n");
-
         struct node *new_node = init_node(new_board);
 
         if(check_exist(graph, new_node))
@@ -288,14 +313,12 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
     add_child_to(parent, nodes[best_index]);
     add_to_graph(graph, nodes[best_index]);
 
-    if(nodes[best_index]->ready_v == 1) return 1;
-
-
     struct node *curr_node = nodes[best_index];
     struct board curr_board = boards[best_index];
 
-    free(boards);
-    free(nodes);
+    if(nodes[best_index]->ready_v == 1) return 1;
+
+    delete_function(nodes, boards, count,best_index);
 
     if(A_star(curr_board, curr_node, graph, path))
     {
@@ -361,8 +384,6 @@ int main(int argc, char** argv)
     struct node *root = init_node(cpy);
 
     struct graph *graph = init_graph(), *path = init_graph();
-    print_board(cpy);
-    printf("\n\n ===========start==========\n\n");
     A_star(cpy, root, graph, path);
 
     return 0;
