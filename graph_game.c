@@ -109,6 +109,14 @@ struct board * init_board(int n, int m, struct point empty)
     return  new_board;
 }
 
+struct graph *init_graph()
+{
+    struct graph *new_graph = malloc(sizeof *new_graph);
+    new_graph->nodes_count = 0;
+    new_graph->node = NULL;
+    return new_graph;
+}
+
 size_t length_of(int n)
 {
     int out = 0;
@@ -184,7 +192,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty)//
         }
     }
 
-    if(!delta_empty->x && delta_empty->y == 1)
+    if(!delta_empty->x && delta_empty->y == -1)
     {
         pos.x = board.empty.x + 1, pos.y = board.empty.y;
         delta_empty->x = 1, delta_empty->y = 0;
@@ -237,7 +245,7 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
     struct board boards[4];
     int count = 0;
 
-    while(delta.x && delta.y)
+    while(delta.x != 1 && delta.y != 1)
     {
         struct board new_board = generate_new_board(board, &delta);
         struct node *new_node = init_node(new_board);
@@ -337,22 +345,10 @@ int main(int argc, char** argv)
 
     struct board *board1 = init_board(3, 3, (struct point){2,2});
 
-    int p = 9;
-    for(int y = 0;y < board1->n;y++)
-        for(int x = 0;x < board1->m;x++)
-            board1->data[y][x] = p--;
+    struct graph *graph = init_graph();
+    struct graph *path = init_graph();
 
-    board1->data[2][2] = 0;
-
-
-    struct board b = *board1;
-    struct node *other = init_node(b);
-
-
-    /*struct graph *graph = {0, NULL};
-    struct graph *path = (0, NULL);
-
-    A_star(cpy, root, graph, path);*/
+    A_star(cpy, root, graph, path);
 
     return 0;
 }
