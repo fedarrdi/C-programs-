@@ -29,13 +29,6 @@ struct graph
     struct node **node;
 };
 
-
-unsigned length(int n)
-{
-    unsigned l = 0;
-    for(;n;n /= 10, l++);
-    return l;
-}
 int number_of_bits_in(int n)
 {
     long long p = 1, out = 0;
@@ -56,22 +49,24 @@ unsigned long long number_of_bits_board(const struct board board)
 void put_digits(unsigned long long *arr, struct board board)
 {
     int idx = 0,i = 0;
-    for(int y = 0;y < board.m;y++)
-        for(int x = 0;x < board.n;x++)
+    for(int y = 0;y < board.n;y++)
+        for(int x = 0;x < board.m;x++)
         {
-            int curr_v = board.data[y][x];
-            for(int j = 0;j < number_of_bits_in(curr_v);j++, i++)
+            int curr_v = board.data[y][x], n = number_of_bits_in(curr_v);
+            for(int j = 0;j < n;j++)
             {
-                arr[idx] |= curr_v & 1 << i;
-                if(i == sizeof (unsigned long long ) * 8) idx ++, i = 0;
+                char curr_bit = ((curr_v & (1 << j)) >> j);
+                arr[idx] |= curr_bit << i;
+                if(++i > sizeof (unsigned long long ) * 8) idx ++, i = 0;
             }
+
         }
 }
 
 unsigned long long *from_board_to_ind(const struct board board, struct node *node)
 {
-    int ull = number_of_bits_board(board);
-    node->ull_count =  ull / (sizeof(unsigned long long) * 8) + 1;
+    int bits = number_of_bits_board(board);
+    node->ull_count =  bits / (sizeof(unsigned long long) * 8) + 1;
     unsigned long long *ind = malloc(sizeof *ind * node->ull_count);
     put_digits(ind, board);
     return ind;
@@ -82,7 +77,7 @@ float from_board_to_ready_v(struct board board)
     int times = 0;
     for(int y = 0;y < board.n;y++)
         for(int x = 0;x < board.m;x++)
-            times += (y * board.m + x == board.data[y][x] - 1);
+            times += (y * board.m + x == board.data[y][x]);
 
     return (float)times / (float)(board.n * board.m);
 }
@@ -188,7 +183,7 @@ int **cpy_data(struct board board)
     return data;
 }
 
-struct board generate_new_board(struct board board, struct point *delta_empty)///first time last_empty == board->empty
+struct board generate_new_board(struct board board, struct point *delta_empty)
 {
     struct point pos;
 
@@ -247,7 +242,11 @@ int check_exist(const struct graph * graph, struct node * curr)
 {
     for(int i = 0;i < graph->nodes_count;i++)
         if(cmp_nodes(curr, graph->node[i]))
+        {
+            printf("%llu %llu \n", curr->index[0], graph->node[i]->index[0]);
             return 1;
+
+        }
     return 0;
 }
 
@@ -271,9 +270,6 @@ void delete_function(struct node **nodes, struct board * boards, int count, int 
         if(i == best_index)
             continue;
 
-        free(nodes[i]->index);
-        free(nodes[i]->children);
-
         for(int j = 0;j < boards[i].n;j++)
             free(boards[i].data[j]);
     }
@@ -291,27 +287,38 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
 
     int count = 0;
 
-    while(delta.x != 1 && delta.y != 1)
+    print_board(board);
+    printf("\n");
+    while(delta.x != 1 || delta.y != 1)
     {
         struct board new_board = generate_new_board(board, &delta);
         struct node *new_node = init_node(new_board);
 
+        print_board(new_board);
+
         if(check_exist(graph, new_node))
             free(new_node);
+
         else
         {
             nodes[count] = new_node;
             boards[count++] = new_board;
         }
+        printf("\n");
     }
-    int best_index = 0;
+    printf("\n==========================\n");
 
+    for(int i = 0;i < count;i++)
+        add_to_graph(graph, nodes[i]);
+
+
+    int best_index = 0;
     for(int i = 1;i < count;i++)
-        if(nodes[i]->ready_v > nodes[best_index]->ready_v)
+        if (nodes[i]->ready_v > nodes[best_index]->ready_v)
             best_index = i;
 
+
     add_child_to(parent, nodes[best_index]);
-    add_to_graph(graph, nodes[best_index]);
 
     struct node *curr_node = nodes[best_index];
     struct board curr_board = boards[best_index];
@@ -384,6 +391,7 @@ int main(int argc, char** argv)
     struct node *root = init_node(cpy);
 
     struct graph *graph = init_graph(), *path = init_graph();
+
     A_star(cpy, root, graph, path);
 
     return 0;
