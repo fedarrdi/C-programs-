@@ -199,10 +199,9 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos, data};
+            return (struct board) {board.n, board.m, data, pos};
         }
     }
-
     if(!delta_empty->x && delta_empty->y == -1)
     {
         pos.x = board.empty.x + 1, pos.y = board.empty.y;
@@ -211,7 +210,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos, data};
+            return (struct board){board.n, board.m, data, pos};
         }
     }
 
@@ -223,7 +222,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos, data};
+            return (struct board){board.n, board.m, data, pos};
         }
     }
 
@@ -235,7 +234,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos, data};
+            return (struct board){board.n, board.m, data, pos};
         }
     }
 }
@@ -269,7 +268,7 @@ void print_state(int state)
         printf("RIGHT\n");
     if(state == 3)
         printf("DOWN\n");
-    if(state == 3)
+    if(state == 4)
         printf("LEFT\n");
 }
 
@@ -311,6 +310,7 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
             boards[count++] = new_board;
         }
     }
+    if(count == 0) return 0;
 
     for(int i = 0;i < count;i++)
         add_to_graph(graph, nodes[i]);
@@ -328,18 +328,21 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
     struct board curr_board = boards[best_index];
     int curr_state = state[best_index];
 
-    if(nodes[best_index]->ready_v == 1) return 1;
-
-    ///delete_function(boards, count, best_index); osvobojdavaneto na pamet chupi neshtata
+    if(nodes[best_index]->ready_v == 1)
+    {
+        print_state(curr_state);
+        print_board(curr_board);
+        return 1;
+    }
 
     if(A_star(curr_board, curr_node, graph))
     {
-
         print_state(curr_state);
         print_board(curr_board);
 
         return 1;
     }
+    return 1;
 }
 
 struct board *read_file(char *file_name)
@@ -398,7 +401,7 @@ int main(int argc, char** argv)
 
     struct node *root = init_node(cpy);
 
-    struct graph *graph = init_graph(), *path = init_graph();
+    struct graph *graph = init_graph();
 
     A_star(cpy, root, graph);
 
