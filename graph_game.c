@@ -185,7 +185,7 @@ int **cpy_data(struct board board)
     return data;
 }
 
-struct board generate_new_board(struct board board, struct point *delta_empty,int *out)
+int generate_new_board(struct board board, struct point *delta_empty, int *out, struct board *out_board)
 {
     struct point pos;
 
@@ -199,7 +199,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board) {board.n, board.m, data, pos};
+            *out_board = (struct board) {board.n, board.m, data, pos};
+            return 1;
         }
     }
     if(!delta_empty->x && delta_empty->y == -1)
@@ -210,7 +211,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos};
+            *out_board = (struct board) {board.n, board.m, data, pos};
+            return 1;
         }
     }
 
@@ -222,7 +224,8 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos};
+            *out_board = (struct board) {board.n, board.m, data, pos};
+            return 1;
         }
     }
 
@@ -234,9 +237,11 @@ struct board generate_new_board(struct board board, struct point *delta_empty,in
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
-            return (struct board){board.n, board.m, data, pos};
+            *out_board = (struct board) {board.n, board.m, data, pos};
+            return 1;
         }
     }
+    return 0;
 }
 
 int check_exist(const struct graph * graph, struct node * curr)
@@ -291,13 +296,12 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
 
     struct node **nodes = malloc(sizeof *nodes * 4);
     struct board *boards = malloc(sizeof *boards * 4);
-    int *state = malloc(sizeof *state * 4);
-    int count = 0;
+    int *state = malloc(sizeof *state * 4), count = 0, curr_state;
 
-    while(delta.x != 1 || delta.y != 1)
+    struct board new_board;
+
+    while(generate_new_board(board, &delta, &curr_state, &new_board))
     {
-        int curr_state;
-        struct board new_board = generate_new_board(board, &delta, &curr_state);
         struct node *new_node = init_node(new_board);
 
         if(check_exist(graph, new_node))
@@ -326,7 +330,7 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
 
     struct node *curr_node = nodes[best_index];
     struct board curr_board = boards[best_index];
-    int curr_state = state[best_index];
+    curr_state = state[best_index];
 
     if(nodes[best_index]->ready_v == 1)
     {
