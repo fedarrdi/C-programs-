@@ -183,7 +183,7 @@ int **cpy_data(struct board board)
     return data;
 }
 
-struct board generate_new_board(struct board board, struct point *delta_empty)
+struct board generate_new_board(struct board board, struct point *delta_empty,int *out)
 {
     struct point pos;
 
@@ -193,7 +193,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty)
     {
         pos.x = board.empty.x, pos.y = board.empty.y - 1;
         delta_empty->y = -1;
-
+        *out = 1;
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
@@ -205,7 +205,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty)
     {
         pos.x = board.empty.x + 1, pos.y = board.empty.y;
         delta_empty->x = 1, delta_empty->y = 0;
-
+        *out = 2;
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
@@ -217,7 +217,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty)
     {
         pos.x = board.empty.x, pos.y = board.empty.y + 1;
         delta_empty->x = 0, delta_empty->y = 1;
-
+        *out = 3;
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
@@ -229,7 +229,7 @@ struct board generate_new_board(struct board board, struct point *delta_empty)
     {
         pos.x = board.empty.x - 1, pos.y = board.empty.y;
         delta_empty->y = delta_empty->x = 1;
-
+        *out = 4;
         if (is_place_valid(board, &pos))
         {
             swap(&data[board.empty.y][board.empty.x], &data[pos.y][pos.x]);
@@ -242,25 +242,8 @@ int check_exist(const struct graph * graph, struct node * curr)
 {
     for(int i = 0;i < graph->nodes_count;i++)
         if(cmp_nodes(curr, graph->node[i]))
-        {
-            printf("%llu %llu \n", curr->index[0], graph->node[i]->index[0]);
             return 1;
-
-        }
     return 0;
-}
-
-
-void print_board(struct board board)
-{
-    for(int y = 0;y < board.n;y++)
-    {
-        for (int x = 0; x < board.m; x++)
-        {
-            printf("%d ", board.data[y][x]);
-        }
-        printf("\n");
-    }
 }
 
 void delete_function(struct node **nodes, struct board * boards, int count, int best_index)
@@ -278,35 +261,44 @@ void delete_function(struct node **nodes, struct board * boards, int count, int 
     free(boards);
 }
 
+void print_state(int state)
+{
+    if(state == 1)
+        printf("UP\n");
+    if(state == 2)
+        printf("RIGHT\n");
+    if(state == 3)
+        printf("DOWN\n");
+    if(state == 3)
+        printf("LEFT\n");
+}
+
 int A_star(struct board board, struct node *parent, struct graph *graph, struct graph *path)
 {
     struct point delta = {0, 0};
 
     struct node **nodes = malloc(sizeof *nodes * 4);
     struct board *boards = malloc(sizeof *boards * 4);
-
+    int *state = malloc(sizeof *state * 4);
     int count = 0;
 
-    print_board(board);
-    printf("\n");
     while(delta.x != 1 || delta.y != 1)
     {
-        struct board new_board = generate_new_board(board, &delta);
+        int curr_state;
+        struct board new_board = generate_new_board(board, &delta, &curr_state);
         struct node *new_node = init_node(new_board);
 
-        print_board(new_board);
 
         if(check_exist(graph, new_node))
             free(new_node);
 
         else
         {
+            state[count] = curr_state;
             nodes[count] = new_node;
             boards[count++] = new_board;
         }
-        printf("\n");
     }
-    printf("\n==========================\n");
 
     for(int i = 0;i < count;i++)
         add_to_graph(graph, nodes[i]);
@@ -322,6 +314,7 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
 
     struct node *curr_node = nodes[best_index];
     struct board curr_board = boards[best_index];
+    int curr_state = state[best_index];
 
     if(nodes[best_index]->ready_v == 1) return 1;
 
@@ -329,6 +322,7 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
 
     if(A_star(curr_board, curr_node, graph, path))
     {
+        print_state(curr_state);
         add_to_graph(path, curr_node);
         return 1;
     }
@@ -383,7 +377,7 @@ struct board *read_file(char *file_name)
 }
 
 int main(int argc, char** argv)
-{
+{///heshiraneto ne raboti ne znam zashto mucha go ot 3 dni , razlichni bordove se heshirat po edin i sushti nachin
     if(argc < 2) return 0;
 
     struct board *board = read_file(argv[1]), cpy = *board;
