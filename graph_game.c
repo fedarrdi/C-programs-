@@ -300,8 +300,6 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
         int curr_state;
         struct board new_board = generate_new_board(board, &delta, &curr_state);
         struct node *new_node = init_node(new_board);
-        print_board(new_board);
-        printf("\n");
 
         if(check_exist(graph, new_node))
             free(new_node);
@@ -336,7 +334,10 @@ int A_star(struct board board, struct node *parent, struct graph *graph)
 
     if(A_star(curr_board, curr_node, graph))
     {
+
         print_state(curr_state);
+        print_board(curr_board);
+
         return 1;
     }
 }
