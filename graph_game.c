@@ -42,7 +42,7 @@ unsigned long long number_of_bits_board(const struct board board)
     unsigned long long out = 0;
     for(int y = 0;y < board.n;y++)
         for (int x = 0; x < board.m; x++)
-               out += number_of_bits_in(board.data[y][x]);
+               out += number_of_bits_in(board.data[y][x] + 3);
     return out;
 }
 
@@ -60,6 +60,8 @@ void put_digits(unsigned long long *arr, struct board board)
                 if(++i > sizeof (unsigned long long ) * 8) idx ++, i = 0;
             }
 
+            i+= 3;
+            if(i > sizeof (unsigned long long ) * 8) idx ++, i = 0;
         }
 }
 
@@ -246,7 +248,7 @@ int check_exist(const struct graph * graph, struct node * curr)
     return 0;
 }
 
-void delete_function(struct node **nodes, struct board * boards, int count, int best_index)
+void delete_function(struct board * boards, int count, int best_index)
 {
     for(int i = 0;i < count;i++)
     {
@@ -256,8 +258,6 @@ void delete_function(struct node **nodes, struct board * boards, int count, int 
         for(int j = 0;j < boards[i].n;j++)
             free(boards[i].data[j]);
     }
-
-    free(nodes);
     free(boards);
 }
 
@@ -273,7 +273,20 @@ void print_state(int state)
         printf("LEFT\n");
 }
 
-int A_star(struct board board, struct node *parent, struct graph *graph, struct graph *path)
+
+void print_board(struct board board)
+{
+    for(int y = 0;y < board.n;y++)
+    {
+        for(int x = 0;x < board.m;x++)
+        {
+            printf("%d ", board.data[y][x]);
+        }
+        printf("\n");
+    }
+}
+
+int A_star(struct board board, struct node *parent, struct graph *graph)
 {
     struct point delta = {0, 0};
 
@@ -287,7 +300,8 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
         int curr_state;
         struct board new_board = generate_new_board(board, &delta, &curr_state);
         struct node *new_node = init_node(new_board);
-
+        print_board(new_board);
+        printf("\n");
 
         if(check_exist(graph, new_node))
             free(new_node);
@@ -318,12 +332,11 @@ int A_star(struct board board, struct node *parent, struct graph *graph, struct 
 
     if(nodes[best_index]->ready_v == 1) return 1;
 
-    delete_function(nodes, boards, count,best_index);
+    ///delete_function(boards, count, best_index); osvobojdavaneto na pamet chupi neshtata
 
-    if(A_star(curr_board, curr_node, graph, path))
+    if(A_star(curr_board, curr_node, graph))
     {
         print_state(curr_state);
-        add_to_graph(path, curr_node);
         return 1;
     }
 }
@@ -377,7 +390,7 @@ struct board *read_file(char *file_name)
 }
 
 int main(int argc, char** argv)
-{///heshiraneto ne raboti ne znam zashto mucha go ot 3 dni , razlichni bordove se heshirat po edin i sushti nachin
+{
     if(argc < 2) return 0;
 
     struct board *board = read_file(argv[1]), cpy = *board;
@@ -386,7 +399,7 @@ int main(int argc, char** argv)
 
     struct graph *graph = init_graph(), *path = init_graph();
 
-    A_star(cpy, root, graph, path);
+    A_star(cpy, root, graph);
 
     return 0;
 }
