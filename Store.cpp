@@ -19,7 +19,8 @@ public:
         this->name = name;
         this->count = count;
         this->price = price;
-        if(count < 0 || name.size() == 0 || price <= 0) this->price = -1;
+        if(count < 0 || name.size() == 0 || price <= 0)
+            this->price = -1;
     }
 
     Product(Product &other)
@@ -120,7 +121,7 @@ private:
 
 public:
 
-    Store(string name, string address, string type, double rent) : Property(address, type, rent),  name(name) { }
+    Store(string name, string address, string type, double rent) : Property(address, type, rent),  name(name){ } ///TODO check if valid
 
     Store (Store &other) : Property(other)
     {
@@ -157,7 +158,7 @@ public:
                 out.push_back(curr.get_name());
         return out;
     }
-    ///TODO fix functions
+
     int add_product(Product new_product)
     {
         for(auto curr : products)
@@ -176,6 +177,7 @@ public:
                 curr.set_count(curr.get_count() + count);
                 return 1;
             }
+
         return 0;
     }
 
@@ -196,6 +198,7 @@ public:
                     return count;
                 }
             }
+
         return 0;
     }
 
@@ -206,7 +209,7 @@ public:
             {
                 return curr.get_count();
             }
-        return -2;
+        return -1;
     }
 
     double check_product_price(string name)
@@ -216,7 +219,7 @@ public:
             {
                 return curr.get_price();
             }
-        return -2;
+        return -1;
     }
 
     void change_price(string name, double new_price)
@@ -235,6 +238,13 @@ public:
         for(auto curr : products)
             cout << curr.get_name() << " " << curr.get_count() << " " << curr.get_price() << endl;
     }
+
+};
+
+
+class Interface
+{
+    
 };
 
 
