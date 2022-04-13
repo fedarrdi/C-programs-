@@ -142,7 +142,7 @@ public:
             for(int i = 0;i < other.products.size();i++)
                 this->products.push_back(other.products[i]);
 
-            ((Store *) this)->operator=(other);
+            ((Property *) this)->operator=(other);
 
         }
         return *this;
