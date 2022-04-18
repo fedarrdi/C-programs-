@@ -18,7 +18,7 @@ void get_path(int f, int t, int k, vector<int> &path)
         return;
     }
 
-    if(dp[f][t][0] != INF && dp[f][t][0] != 0)
+    if(k == 0)
     {
         path.push_back(f);///moje i da trqbva da gi pushavam na obrtano
         path.push_back(t);
