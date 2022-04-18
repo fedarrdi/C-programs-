@@ -1,96 +1,85 @@
-#include<iostream>
-#include<cmath>
-#include<vector>
+#include <iostream>
+#include <vector>
 using namespace std;
 
-#define INF 10000;
+#define INF 10000
 
-const int MAX_N = 303;
+const int MAX_N = 300;
 
-long long dp[MAX_N][MAX_N][MAX_N];
+int dp[MAX_N][MAX_N][MAX_N];
 
-//priema samo validni putishta
-void getpath(int f, int t, int k, vector<int> &path)
+int min(int a, int b) { return a < b ? a : b; }
+
+void get_path(int f, int t, int k, vector<int> &path)
 {
-    if (f == t) 
+    if(f == t)
     {
         path.push_back(f);
         return;
     }
-    
-    if (k == 0)
+
+    if(dp[f][t][0] != INF && dp[f][t][0] != 0)
     {
-        path.push_back(f);
+        path.push_back(f);///moje i da trqbva da gi pushavam na obrtano
         path.push_back(t);
         return;
     }
 
-    if(dp[f][t][k] < dp[f][t][k - 1])
+    if(dp[f][t][k] < dp[f][t][k - 1])/// vzel sum tova dp[v][k][k - 1] + dp[k][x][k - 1]
     {
-        //izpolzvame k
-        getpath(f, k, k-1, path);
-        path.pop_back(); // mahame k
-        //f -> ... -> u -> k
-        //f -> ....-> u
-        //k -> .... -> t
-        getpath(k, t, k-1, path);
+        get_path(f, k, k - 1, path);
+        path.pop_back();
+        get_path(k, t, k - 1, path);
     }
-    
     else
-    {
-        getpath(f, t, k-1, path);
+    {//// v tozi sluchai dp[f][t][k] = dp[f][t][k - 1], zashtoto dp[f][t][k] nqma kak da e po - malko ot dp[f][t][k - 1]
+        get_path(f, t, k - 1, path);
     }
 }
 
-int n, m;
-
-vector<int> getpath(int f, int t) 
+void print_path(int f, int t, int n)
 {
     vector<int> path;
-    getpath(f, t, n, path);
-    return path;
+    get_path(f, t, n, path);
+    for(auto curr :  path)
+        cout << curr << " ";
+    cout << endl;
 }
+
 
 int main()
 {
+    int n, m;
+
     cin >> n >> m;
-    
-                
-    for(int y = 0;y <= n;y++)
-        for(int x = 0;x <= n;x++)
-            dp[y][x][0] = INF; 
-    
+
+    for(int i = 1;i <= n;i++)
+        for(int j = 1;j <= n;j++)
+            dp[i][j][0] = INF;
+
     for(int i = 1;i <= n;i++)
         dp[i][i][0] = 0;
-    
+
     for(int i = 0;i < m;i++)
     {
-        int f, t, w;
-        cin >> f >> t >> w;
-        dp[f][t][0] = w;
-        dp[t][f][0] = w;
+        int u, v, w;
+        cin >> u >> v >> w;
+        dp[u][v][0] = w;
+        dp[v][u][0] = w;
     }
 
     for(int k = 1;k <= n;k++)
-    {
-        for(int v = 1; v <= n;v++)
-        {
-            for(int  x = 1;x <= n;x++)
-            {
-                dp[v][x][k] = min(
-                                dp[v][x][k - 1],
-                                dp[v][k][k - 1] + dp[k][x][k - 1]
-                                );
-            }
-        }
-    }
+        for(int v = 1;v <= n;v++)
+            for(int x = 1;x <= n;x++)
+                dp[v][x][k] = min(dp[v][x][k-1], dp[v][k][k - 1] + dp[k][x][k - 1]);
 
     cout << endl;
-    for(int k = 0;k <= n;k++)
+
+    for(int k = 1;k <= n;k++)
     {
-        for(int y = 1;y <= n;y++)
+        for (int y = 1; y <= n; y++)
         {
-            for(int x = 1;x <= n;x++)
+            for (int x = 1; x <= n; x++)
             {
                 cout << dp[y][x][k] << " ";
             }
@@ -98,22 +87,63 @@ int main()
         }
         cout << endl;
     }
+    /// shortest cycle
 
-
-    int q;
-    cin  >> q;
-    for(int i = 0;i < q;i++)
+    vector<int> best_path;
+    int best_weight_path = INF, a, b, c;
+    for(int u = 1;u <= n;u++)
     {
-        int f, t;
-        cin >> f >> t;
-        cout << f <<  "----> " << t << " " << dp[f][t][n] << endl;
+        for(int v = 1;v <= n;v++)
+        {
+            if(u == v || dp[u][v][0] == INF) continue;
 
-        auto path = getpath(f, t);
-        for (int x : path) {
-            cout << x << ' ';
+            for(int x = 1; x <= n;x++)
+            {
+                if(x == u || x == v || dp[x][u][0] == INF) continue;
+
+                if(u < x || u < v) continue;
+
+                int curr_path_weight = dp[x][v][u - 1] + dp[u][v][0] + dp[u][x][0];
+                if(best_weight_path > curr_path_weight)
+                {
+                    best_path.clear();
+                    get_path(x, v, u - 1, best_path);
+                    a = x, b = v, c = u;
+                    best_weight_path = curr_path_weight;
+                }
+            }
         }
-        cout << endl;
+    }
+    for(auto curr : best_path)
+        cout << curr << " ";
+    cout << endl;
+
+    cout << best_weight_path << endl;
+
+
+    cout << endl << endl << endl;
+
+    ///shortest dist from to
+    for(int v = 1; v <= n; v++)
+    {
+        for(int  x = 1; x<= n; x++)
+        {
+            if(v == x) continue;
+            cout << "dist from " << v << " to " << x << " = " << dp[v][x][n] << endl;
+            print_path(v, x, n);
+        }
     }
 
     return 0;
 }
+
+/*
+5 7
+1 2 1
+1 4 1
+2 3 1
+2 6 100
+3 5 1
+5 4 1
+4 6 100
+*/
