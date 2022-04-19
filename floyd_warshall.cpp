@@ -74,7 +74,6 @@ int main()
                 dp[v][x][k] = min(dp[v][x][k-1], dp[v][k][k - 1] + dp[k][x][k - 1]);
 
     cout << endl;
-
     for(int k = 1;k <= n;k++)
     {
         for (int y = 1; y <= n; y++)
@@ -87,10 +86,8 @@ int main()
         }
         cout << endl;
     }
-    /// shortest cycle
 
-    vector<int> best_path;
-    int best_weight_path = INF, a, b, c;
+    int best_weight_path = INF, U, V, X;
     for(int u = 1;u <= n;u++)
     {
         for(int v = 1;v <= n;v++)
@@ -106,14 +103,16 @@ int main()
                 int curr_path_weight = dp[x][v][u - 1] + dp[u][v][0] + dp[u][x][0];
                 if(best_weight_path > curr_path_weight)
                 {
-                    best_path.clear();
-                    get_path(x, v, u - 1, best_path);
-                    a = x, b = v, c = u;
+                    X = x, U = u, V = v;
                     best_weight_path = curr_path_weight;
                 }
             }
         }
     }
+     vector<int> best_path;
+    
+    get_path(X, V, U - 1,  best_path);
+    best_path.push_back(U);
     for(auto curr : best_path)
         cout << curr << " ";
     cout << endl;
@@ -123,7 +122,6 @@ int main()
 
     cout << endl << endl << endl;
 
-    ///shortest dist from to
     for(int v = 1; v <= n; v++)
     {
         for(int  x = 1; x<= n; x++)
