@@ -1,119 +1,78 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <algorithm>
+#include<iostream>
+#include<vector>
+#include<stack>
+
 using namespace std;
 
-const int MAX = 1e5;
+const int MAX = 1e4;
+
 vector<int> e[MAX];
 vector<int> p[MAX];
-queue<int> nodes;
-
-int enter_time[MAX], exit_time[MAX];
-
-void dfs_calc_times(int curr, int *max)
-{
-    enter_time[curr] = ++(*max);
-
-    for(auto next : e[curr])
-      if(!enter_time[next])
-          dfs_calc_times(next, max);
-
-    exit_time[curr] = ++(*max);
-}
-
-void visit_every_node(int n)
-{
-    int max = 0;
-    for (int i = 1; i <= n; i++)
-        if (!enter_time[i])
-            dfs_calc_times(i, &max);
-}
-
-void create_reverse_graph(int n)
-{
-    for(int i = 1;i <= n;i++)
-        for(auto curr : e[i])
-            p[curr].push_back(i);
-}
-
-struct packet
-{
-    int i, exit_time;
-} packets[MAX];
-
-bool cmp_function(packet a, packet b)
-{
-    return a.exit_time > b.exit_time;
-}
-
-void push_in_stack(int n)
-{
-    for(int i = 0;i < n;i++)
-    {
-        packets[i].i = i + 1;
-        packets[i].exit_time = exit_time[i + 1];
-    }
-    int len =  sizeof(packets) / sizeof(packets[0]);
-    sort(packets, packets + len, cmp_function);
-
-    for(int i = 0;i < n;i++)
-        nodes.push(packets[i].i);
-
-}
+stack<int> s;
 
 bool vis[MAX];
-void dfs_print_component(int curr)
+
+void dfs(int curr)
 {
     vis[curr] = true;
-    cout << curr << endl;
-    for(auto next : p[curr])
+    for(auto next : e[curr])
         if(!vis[next])
-            dfs_print_component(next);
+            dfs(next);
+
+    s.push(curr);
 }
 
-void get_components()
+void visit_all(int n)
 {
-    int component_index = 0;
-    while(!nodes.empty())
+    for(int i = 1;i <= n;i++)
+        if(!vis[i])
+            dfs(i);
+}
+
+bool vis2[MAX];
+
+void dfs_print(int curr)
+{
+    vis2[curr] = true;
+    for(auto next : p[curr])
+        if(!vis2[next])
+            dfs_print(next);
+
+    cout << curr << " ";
+}
+
+void find_strongly_connected_components()
+{
+    while(!s.empty())
     {
-        int v = nodes.front();
-        nodes.pop();
-        if(!vis[v])
+        int v = s.top();
+        s.pop();
+
+        if (!vis2[v])
         {
-            cout << "component: " << component_index++ << endl;
-            dfs_print_component(v);
+            dfs_print(v);
             cout << endl;
         }
     }
 }
 
-void print_queue()
-{
-    while(!nodes.empty())
-    {
-        int v = nodes.front();
-        nodes.pop();
-        cout << v << endl;
-    }
-}
 
 int main()
 {
     int n, m;
-    cin  >> n >> m;
-    for(int i = 0 ;i < m;i++)
+    cin >> n >> m;
+
+    for(int i = 0;i < m;i++)
     {
-        int from, to;
-        cin  >>  from  >> to;
-        e[from].push_back(to);
+        int f, t;
+        cin >> f >> t;
+        e[f].push_back(t);
+        p[t].push_back(f);
     }
 
-    visit_every_node(n);
-    create_reverse_graph(n);
-    push_in_stack(n);
-    get_components();
-    //print_queue();
+    visit_all(n);
+    find_strongly_connected_components();
+
     return 0;
 }
 
