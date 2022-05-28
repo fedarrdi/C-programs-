@@ -2,11 +2,14 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <cstdlib>
 
 using namespace std;
 
 class Character
 {
+
 public:
 
     Character(string name, float health, float defense)
@@ -36,6 +39,7 @@ protected:
 
 class Enemy : public Character
 {
+
 public:
     Enemy(const string& name, float health, float defense, float damage) : Character(name, health, defense), damage(damage) { }
 
@@ -45,6 +49,7 @@ public:
 
 private:
     float damage;
+
 };
 
 class Ability
@@ -64,6 +69,7 @@ public:
 private:
     string name;
     float damage;
+
 };
 
 class Player : public Character
@@ -86,10 +92,12 @@ public:
 
 private:
     vector<Ability> abilities;
+
 };
 
 class PlayerHelper
 {
+
 public:
     static float getTotalPlayerDamage(const Player& player)
     {
@@ -101,10 +109,12 @@ public:
 
         return damage_all;
     }
+
 };
 
 class Arena
 {
+
 public:
     static int currentEnemyIndex;
 
@@ -132,25 +142,25 @@ public:
                         curr_enemy_health += curr_enemy_defense;
                         curr_enemy_defense = 0;
                     }
-                    
+
                     if (curr_enemy_health <= 0)
                     {
                         curr_enemy.setHealth(0);
                         curr_enemy.setDefense(0);
                     }
-                    
+
                 }
-                
+
                 if(move)
                 {
                     player_defense -= curr_enemy.getDamage();
-                    
+
                     if(player_defense < 0)
                     {
                         player_health += player_defense;
                         player_defense = 0;
                     }
-                    
+
                     player.setDefense(player_defense);
                     player.setHealth(player_health);
 
@@ -159,24 +169,79 @@ public:
                     {
                         player.setDefense(0);
                         player.setHealth(0);
-                        
+
                         return false;
                     }
-                    
+
                 }
-                
+
             }
         }
-        
-        
         return true;
     }
-
 };
 
 int Arena::currentEnemyIndex = 0;
 
 int main()
 {
+
+    ifstream input_file;
+    input_file.open(R"(C:\Users\fedar\CLionProject\OOP2\input.txt)", ios::in);
+
+    if(!input_file.is_open()) return 0;
+
+    Player player("", 0, 0);
+    Ability ability("", 0);
+    vector<Enemy> enemies;
+
+    int line = 1;
+    for(string buffer; getline(input_file, buffer);line++)
+    {
+        int line_word_index = 0;
+        istringstream iss(buffer);
+        Enemy enemy("", 0, 0, 0);
+        do
+        {
+            string curr_word;
+            iss >> curr_word;
+            line_word_index++;
+
+            if(line == 1)
+            {
+                if (line_word_index == 0) player.setName(curr_word);
+                if (line_word_index == 1) player.setDefense(atof(curr_word));
+                if (line_word_index == 2) player.setHealth(atof(curr_word));
+
+
+                if (line_word_index > 2 && line_word_index % 2 == 1)
+                    ability.setName(curr_word);
+
+                if (line_word_index > 2 && line_word_index % 2 == 0)
+                {
+                    ability.setDamage(atof(curr_word));
+                    player.addAbility(ability);
+                }
+            }
+
+            if(line >= 2)
+            {
+
+                if (line_word_index == 0) enemy.setName(curr_word);
+                if (line_word_index == 1) enemy.setHealth(atof(curr_word));
+                if (line_word_index == 2) enemy.setDefense(atof(curr_word));
+                if (line_word_index == 3)
+                {
+                    enemy.setDamage(atof(curr_word));
+                    enemies.push_back(enemy);
+                }
+            }
+
+
+        } while (iss);
+    }
+
+    input_file.close();
+
     return 0;
 }
