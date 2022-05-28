@@ -189,59 +189,54 @@ int main()
     ifstream input_file;
     input_file.open(R"(C:\Users\fedar\CLionProject\OOP2\input.txt)", ios::in);
 
-    if(!input_file.is_open()) return 0;
+    string buffer;
+    stringstream ss;
 
-    Player player("", 0, 0);
-    Ability ability("", 0);
-    vector<Enemy> enemies;
+    getline(input_file, buffer);
+    ss << buffer;
 
-    int line = 1;
-    for(string buffer; getline(input_file, buffer);line++)
+    string player_name;
+    float health, defense;
+    ss >> player_name >> health >> defense;
+    Player player(player_name, health, defense);
+
+    string ability_name;
+    float damage;
+    while(ss)
     {
-        int line_word_index = 0;
-        istringstream iss(buffer);
-        Enemy enemy("", 0, 0, 0);
-        do
-        {
-            string curr_word;
-            iss >> curr_word;
-            line_word_index++;
-
-            if(line == 1)
-            {
-                if (line_word_index == 0) player.setName(curr_word);
-                if (line_word_index == 1) player.setDefense(atof(curr_word));
-                if (line_word_index == 2) player.setHealth(atof(curr_word));
+        ss >> ability_name >> damage;
+        player.addAbility(Ability(ability_name, damage));
+    }
 
 
-                if (line_word_index > 2 && line_word_index % 2 == 1)
-                    ability.setName(curr_word);
-
-                if (line_word_index > 2 && line_word_index % 2 == 0)
-                {
-                    ability.setDamage(atof(curr_word));
-                    player.addAbility(ability);
-                }
-            }
-
-            if(line >= 2)
-            {
-
-                if (line_word_index == 0) enemy.setName(curr_word);
-                if (line_word_index == 1) enemy.setHealth(atof(curr_word));
-                if (line_word_index == 2) enemy.setDefense(atof(curr_word));
-                if (line_word_index == 3)
-                {
-                    enemy.setDamage(atof(curr_word));
-                    enemies.push_back(enemy);
-                }
-            }
-
-
-        } while (iss);
+    vector<Enemy> enemies;
+    for(float health, defense, damage;getline(input_file, buffer);)
+    {
+        ss << buffer;
+        string enemy_name;
+        ss >> enemy_name >> health >> defense >> damage;
+        enemies.push_back(Enemy(enemy_name, health, defense, damage));
     }
 
     input_file.close();
+
+    bool player_win = Arena::fight(player, enemies);
+    ofstream output_File("output.txt");
+
+    if(player_win)
+    {
+        output_File << "Player Won!\n";
+        output_File << "Player health: " << player.getHealth() << "\n";
+        output_File << "Player defense: " << player.getDefense() << "\n";
+    }
+    else
+    {
+        output_File << "Player Lost!\n";
+        output_File << "Enemy " << Arena::currentEnemyIndex << "health: " << enemies[Arena::currentEnemyIndex].getHealth() << "\n";
+        output_File << "Enemy " << Arena::currentEnemyIndex << "defense: " << enemies[Arena::currentEnemyIndex].getDefense() << "\n";
+    }
+
+    output_File.close();
 
     return 0;
 }
