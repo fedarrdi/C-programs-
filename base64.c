@@ -3,7 +3,7 @@
 
 static const char * base64_chars ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-char *base64_decode(char *byte3)
+char *base64_encode(char *byte3)
 {
     char *byte4 = malloc(4);
     if(!byte4) return NULL;
@@ -32,8 +32,7 @@ char *base64_decode(char *byte3)
     return byte4;
 }
 
-
-char *base64_encode(char *byte4)
+char *base64_decode(char *byte4)
 {
     char *byte3 = malloc(3);
     if(!byte3) return NULL;
@@ -64,20 +63,14 @@ char *base64_encode(char *byte4)
 int main()
 {
     char *msg = "Hey";
-    char *base64_msg = base64_decode(msg);
-
-    for(int i = 0;i < 4;i++)
-        printf("%d ", base64_msg[i]);
-
-    printf("\n");
+    char *base64_msg = base64_encode(msg);
 
     for(int i = 0;i < 4;i++)
         printf("%c", base64_chars[base64_msg[i]]);
-
     printf("\n");
 
-    char *encoded_msg = base64_encode(base64_msg);
-    
+
+    char *encoded_msg = base64_decode(base64_msg);
     for(int i = 0;i < 3;i++)
         printf("%c", encoded_msg[i]);
 
