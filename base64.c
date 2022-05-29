@@ -18,7 +18,6 @@ char *base64_encode(char *byte3)
 
         for(int byte3_bit_index = 0;byte3_bit_index < 8;byte3_bit_index++)
         {
-
             char byte3_curr_bit = (curr_byte3 & (1 << byte3_bit_index)) >> byte3_bit_index;
             byte4[byte4_byte_index] |= byte3_curr_bit << byte4_bit_index++;
 
@@ -123,7 +122,7 @@ char *decode_msg(char *encoded_msg)
 
 int main()
 {
-    char *encoded_msg = break_msg3("hello world my name is Radoslav and I am the best in boxing!!!");
+    char *encoded_msg = break_msg3("The human mind has a primitive ego defense mechanism that negates all realities.");
 
     int n = strlen(encoded_msg);
     for(int i = 0;i < n;i++)
