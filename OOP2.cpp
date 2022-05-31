@@ -131,16 +131,16 @@ public:
             float curr_enemy_defense = curr_enemy.getDefense(), curr_enemy_health = curr_enemy.getHealth();
             float player_defense = player.getDefense(), player_health = player.getHealth();
 
-            for(int move = 0;curr_enemy_health != 0 && player.getHealth() != 0; move = !move)
+            for(int move = 0;curr_enemy.getHealth() != 0 && player.getHealth() != 0; move = !move)
             {
                 if (!move)
                 {
                     curr_enemy_defense -= player_damage_on_attack;
-
                     if (curr_enemy_defense < 0)
                     {
                         curr_enemy_health += curr_enemy_defense;
                         curr_enemy_defense = 0;
+
                     }
 
                     if (curr_enemy_health <= 0)
@@ -185,40 +185,66 @@ int Arena::currentEnemyIndex = 0;
 
 int main()
 {
-
     ifstream input_file;
-    input_file.open(R"(C:\Users\fedar\CLionProject\OOP2\input.txt)", ios::in);
+    input_file.open("input.txt", ios::in);
 
     string buffer;
-    stringstream ss;
-
+   
     getline(input_file, buffer);
+    stringstream ss;
     ss << buffer;
 
     string player_name;
-    float health, defense;
+    float health, defense, damage;
     ss >> player_name >> health >> defense;
-    Player player(player_name, health, defense);
+    Player player(player_name, health ,defense);
 
     string ability_name;
-    float damage;
     while(ss)
     {
         ss >> ability_name >> damage;
         player.addAbility(Ability(ability_name, damage));
     }
 
-
     vector<Enemy> enemies;
-    for(float health, defense, damage;getline(input_file, buffer);)
-    {
+    string enemy_name;
+
+
+    while(getline(input_file, buffer))
+    {  
+        ss.clear();
         ss << buffer;
-        string enemy_name;
         ss >> enemy_name >> health >> defense >> damage;
-        enemies.push_back(Enemy(enemy_name, health, defense, damage));
+        Enemy *new_enemy = new Enemy(enemy_name, health, defense, damage);
+        enemies.push_back(*new_enemy);
     }
 
     input_file.close();
+
+
+    /*cout << "print_player " << endl;
+    cout << "player health " << player.getHealth() << endl;
+    cout << "player name " << player.getName() << endl;
+    cout << "player defense " << player.getDefense() << endl << endl; 
+    vector<Ability> abilities = player.getAbilities();
+    
+    for(auto curr_ability : abilities)
+    {
+        cout << "ability print"  << endl;
+        cout << "ability damage " << curr_ability.getDamage() << endl;
+        cout << "ability name " << curr_ability.getName() << endl << endl;
+    }
+
+
+    for(auto curr_enemy : enemies)
+    {
+        cout << "enemy print" << endl;
+        cout << "enemy name " << curr_enemy.getName() << endl;
+        cout << "enemy health " << curr_enemy.getHealth() << endl;
+        cout << "enemy defens " << curr_enemy.getDefense() << endl;
+        cout << "enemy damage " << curr_enemy.getDamage() << endl << endl;
+    }*/
+
 
     bool player_win = Arena::fight(player, enemies);
     ofstream output_File("output.txt");
