@@ -76,8 +76,9 @@ class Player : public Character
 {
 
 public:
-    Player(const string& name, float health, float defense) : Character(name, health, defense) {};
-
+    Player(const string& name, float health, float defense, const std::vector<Ability>& abilities) : Character(name, health, defense), 
+    abilities(abilities){};
+    
     Player& addAbility(const Ability& ability)
     {
         for(auto curr_ability : abilities)
@@ -114,11 +115,10 @@ public:
 
 class Arena
 {
-
 public:
     static int currentEnemyIndex;
 
-    static bool fight(Player& player, vector<Enemy>& enemies)
+    static bool fight(Player& player, std::vector<Enemy>& enemies)
     {
         PlayerHelper player_helper;
 
@@ -193,11 +193,12 @@ int main()
     getline(input_file, buffer);
     stringstream ss;
     ss << buffer;
-
+    
+    vector<Ability> a;
     string player_name;
     float health, defense, damage;
     ss >> player_name >> health >> defense;
-    Player player(player_name, health ,defense);
+    Player player(player_name, health ,defense, a);
 
     string ability_name;
     while(ss)
@@ -244,7 +245,6 @@ int main()
         cout << "enemy defens " << curr_enemy.getDefense() << endl;
         cout << "enemy damage " << curr_enemy.getDamage() << endl << endl;
     }*/
-
 
     bool player_win = Arena::fight(player, enemies);
     ofstream output_File("output.txt");
