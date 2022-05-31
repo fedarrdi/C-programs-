@@ -76,9 +76,9 @@ class Player : public Character
 {
 
 public:
-    Player(const string& name, float health, float defense, const std::vector<Ability>& abilities) : Character(name, health, defense), 
-    abilities(abilities){};
-    
+    Player(const string& name, float health, float defense, const std::vector<Ability>& abilities) : Character(name, health, defense),
+                                                                                                     abilities(abilities){};
+
     Player& addAbility(const Ability& ability)
     {
         for(auto curr_ability : abilities)
@@ -189,54 +189,75 @@ int main()
     input_file.open("input.txt", ios::in);
 
     string buffer;
-   
+
     getline(input_file, buffer);
     stringstream ss;
     ss << buffer;
-    
+
     vector<Ability> a;
     string player_name;
-    float health, defense, damage;
+    float health = 0, defense = 0;
     ss >> player_name >> health >> defense;
+
+    if(player_name.empty() || health <= 0 || defense <= 0)
+    {
+        cout <<  "Invalid player stats!" << endl;
+        return 0;
+    }
+
     Player player(player_name, health ,defense, a);
 
     string ability_name;
+    float damage_a = 0;
+
     while(ss)
     {
-        ss >> ability_name >> damage;
-        player.addAbility(Ability(ability_name, damage));
+        ss >> ability_name >> damage_a;
+
+        if(ability_name.empty() || damage_a <= 0)
+        {
+            cout <<  "Invalid ability stats!" << endl;
+            return 0;
+        }
+
+        player.addAbility(Ability(ability_name, damage_a));
     }
 
     vector<Enemy> enemies;
     string enemy_name;
 
-
+    float damage_e = 0, health_e = 0, defense_e = 0;
     while(getline(input_file, buffer))
-    {  
+    {
         ss.clear();
         ss << buffer;
-        ss >> enemy_name >> health >> defense >> damage;
-        Enemy *new_enemy = new Enemy(enemy_name, health, defense, damage);
+        ss >> enemy_name >> health_e >> defense_e >> damage_e;
+
+        if(enemy_name.empty() || health_e <= 0 || defense_e <= 0 || damage_e <= 0)
+        {
+            cout <<  "Invalid enemy stats!" << endl;
+            return 0;
+        }
+
+        auto *new_enemy = new Enemy(enemy_name, health_e, defense_e, damage_e);
         enemies.push_back(*new_enemy);
     }
 
     input_file.close();
 
 
-    /*cout << "print_player " << endl;
+    cout << "print_player " << endl;
     cout << "player health " << player.getHealth() << endl;
     cout << "player name " << player.getName() << endl;
-    cout << "player defense " << player.getDefense() << endl << endl; 
+    cout << "player defense " << player.getDefense() << endl << endl;
     vector<Ability> abilities = player.getAbilities();
-    
+
     for(auto curr_ability : abilities)
     {
         cout << "ability print"  << endl;
         cout << "ability damage " << curr_ability.getDamage() << endl;
         cout << "ability name " << curr_ability.getName() << endl << endl;
     }
-
-
     for(auto curr_enemy : enemies)
     {
         cout << "enemy print" << endl;
@@ -244,7 +265,7 @@ int main()
         cout << "enemy health " << curr_enemy.getHealth() << endl;
         cout << "enemy defens " << curr_enemy.getDefense() << endl;
         cout << "enemy damage " << curr_enemy.getDamage() << endl << endl;
-    }*/
+    }
 
     bool player_win = Arena::fight(player, enemies);
     ofstream output_File("output.txt");
