@@ -76,8 +76,18 @@ class Player : public Character
 {
 
 public:
-    Player(const string& name, float health, float defense, const std::vector<Ability>& abilities) : Character(name, health, defense),
-                                                                                                     abilities(abilities){};
+    Player(const string& name, float health, float defense, const std::vector<Ability>& abilities) : Character(name, health, defense)
+    {
+        if(!abilities.size())
+        {
+            this->name = "";
+            return;
+        }
+        
+        for(auto curr_ability : abilities)
+            this->abilities.push_back(curr_ability);
+
+    }
 
     Player& addAbility(const Ability& ability)
     {
@@ -222,7 +232,6 @@ int main()
 
         player.addAbility(Ability(ability_name, damage_a));
     }
-
     vector<Enemy> enemies;
     string enemy_name;
 
@@ -241,6 +250,12 @@ int main()
 
         auto *new_enemy = new Enemy(enemy_name, health_e, defense_e, damage_e);
         enemies.push_back(*new_enemy);
+    }
+    
+    if(enemies.empty())
+    {
+        cout << "Invalid enemy stats!" << endl;
+        return 0;
     }
 
     input_file.close();
