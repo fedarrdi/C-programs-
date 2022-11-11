@@ -52,6 +52,12 @@ int fork_run(char *name)
     long long *shared_memory = mmap(NULL, 255 * sizeof *shared_memory,
                                    PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED,
                                    -1, 0);
+    if(!shared_memory)
+    {
+        printf("ERROR\n");
+        return -1;
+    }
+
     if(fork() == 0)
     {
     
@@ -86,10 +92,12 @@ int fork_run(char *name)
         free(buff);
         close(fd);
     }
+
     printf("hello\n"); 
     print_table(shared_memory); 
-    munmap(shared_memory, 255 * sizeof *shared_memory);
     
+
+    munmap(shared_memory, 255 * sizeof *shared_memory);
     return 0;
 }
 
