@@ -1,0 +1,3 @@
+C:/Users/fedar/CLionProjects/pool/cmake-build-debug/CMakeFiles/pool.dir
+C:/Users/fedar/CLionProjects/pool/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/fedar/CLionProjects/pool/cmake-build-debug/CMakeFiles/rebuild_cache.dir
